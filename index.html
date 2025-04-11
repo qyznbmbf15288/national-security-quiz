@@ -4,40 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>国家安全知识测试</title>
+    <!-- 样式保持不变 -->
     <style>
-        body {
-            font-family: '微软雅黑', sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f8ff;
-        }
-        .question {
-            background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .submit-btn {
-            background: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .score {
-            font-size: 24px;
-            color: #2196F3;
-            text-align: center;
-            margin: 20px;
-        }
-        label {
-            display: block;
-            margin: 8px 0;
-        }
+        body { font-family: '微软雅黑', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f0f8ff; }
+        .question { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .submit-btn { background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .score { font-size: 24px; color: #2196F3; text-align: center; margin: 20px; }
+        label { display: block; margin: 8px 0; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.2); z-index: 1000; text-align: center; width: 80%; max-width: 400px; animation: fadeIn 0.3s; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .info-btn { background: #2196F3; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
     </style>
 </head>
 <body>
@@ -46,10 +23,16 @@
     <div style="text-align: center;">
         <button class="submit-btn" onclick="calculateScore()">提交答案</button>
     </div>
-    <div id="result" class="score"></div>
+
+    <!-- 弹窗结构 -->
+    <div class="overlay" id="overlay"></div>
+    <div class="modal" id="scoreModal">
+        <p id="modalText"></p>
+        <button class="info-btn" id="infoBtn">信息填写</button>
+    </div>
 
     <script>
-        // 完整30道国家安全题库
+        // 完整30道题库
         const questions = [
             {
                 question: "国家安全举报电话是？",
@@ -195,60 +178,49 @@
                 question: "维护国家安全应当坚持的最大优势是？",
                 options: ["科技先进", "党的领导", "人民战争", "法治保障"],
                 answer: 1
+            },
+            {
+                question: "根据《反恐怖主义法》，重点目标的管理单位应当建立什么制度？",
+                options: ["公共安全视频图像信息系统值班监看", "信息备份", "定期演练", "以上都是"],
+                answer: 3
             }
         ];
 
-        // 存储当前试题
+        // 以下JavaScript逻辑保持不变
         let currentQuiz = [];
-
-        // 随机选择10题
         function getRandomQuestions() {
             const shuffled = [...questions].sort(() => 0.5 - Math.random());
             return shuffled.slice(0, 10);
         }
-
-        // 生成试卷
         function generateQuiz() {
             const quiz = document.getElementById('quiz');
             currentQuiz = getRandomQuestions();
-
             let quizHTML = '';
             currentQuiz.forEach((q, index) => {
-                // 打乱选项顺序
                 const options = [...q.options].sort(() => 0.5 - Math.random());
                 const correctIndex = options.indexOf(q.options[q.answer]);
-
-                quizHTML += `
-                    <div class="question">
-                        <p>${index + 1}. ${q.question}</p>
-                        ${options.map((option, i) => `
-                            <label>
-                                <input type="radio" name="q${index}" value="${i === correctIndex ? 1 : 0}">
-                                ${option}
-                            </label>
-                        `).join('')}
-                    </div>
-                `;
+                quizHTML += `<div class="question"><p>${index + 1}. ${q.question}</p>${options.map((option, i) => `
+                    <label><input type="radio" name="q${index}" value="${i === correctIndex ? 1 : 0}">${option}</label>`).join('')}</div>`;
             });
             quiz.innerHTML = quizHTML;
         }
-
-        // 计算分数
         function calculateScore() {
-            let score = 0;
-            
-            currentQuiz.forEach((q, index) => {
-                const selected = document.querySelector(`input[name="q${index}"]:checked`);
-                if (selected && parseInt(selected.value) === 1) {
-                    score += 10;
-                }
-            });
-
-            document.getElementById('result').innerHTML = `您的得分：${score}分`;
-            window.scrollTo(0, document.body.scrollHeight);
+            let score = currentQuiz.reduce((acc, q, index) => acc + (document.querySelector(`input[name="q${index}"]:checked`)?.value === '1' ? 10 : 0), 0);
+            const modal = document.getElementById('scoreModal');
+            const overlay = document.getElementById('overlay');
+            modal.querySelector('#modalText').innerHTML = score >= 50 ? 
+                `你的知识储备很丰富（得分：${score}），恭喜你，现在填写信息后领取PU学分吧！` : 
+                `抱歉（得分：${score}），您未达到领取PU学分的标准`;
+            modal.querySelector('#infoBtn').style.display = score >= 50 ? 'inline-block' : 'none';
+            modal.style.display = overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
         }
-
-        // 页面加载时生成题目
+        document.getElementById('infoBtn').onclick = () => window.location.href = 'https://docs.qq.com/sheet/DT2ROeHNaeFRnRE1h?tab=BB08J2';
+        document.getElementById('overlay').onclick = () => {
+            document.getElementById('scoreModal').style.display = 
+            document.getElementById('overlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
         window.onload = generateQuiz;
     </script>
 </body>
