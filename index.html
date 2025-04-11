@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国家安全知识测试</title>
+    <style>
+        body {
+            font-family: '微软雅黑', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+        .question {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .submit-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .score {
+            font-size: 24px;
+            color: #2196F3;
+            text-align: center;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #2c3e50; text-align: center;">国家安全知识测试</h1>
+    <div id="quiz"></div>
+    <div style="text-align: center;">
+        <button class="submit-btn" onclick="calculateScore()">提交答案</button>
+    </div>
+    <div id="result" class="score"></div>
+
+    <script>
+        // 完整30道国家安全题库
+        const questions = [
+            {
+                question: "国家安全举报电话是？",
+                options: ["12345", "12339", "110", "96110"],
+                answer: 1
+            },
+            {
+                question: "每年全民国家安全教育日是？",
+                options: ["4月15日", "5月15日", "7月1日", "10月1日"],
+                answer: 0
+            },
+            {
+                question: "《网络安全法》正式施行的时间是？",
+                options: ["2015年6月1日", "2017年6月1日", "2019年12月1日", "2021年9月1日"],
+                answer: 1
+            },
+            {
+                question: "发现网络漏洞应当首先报告哪个部门？",
+                options: ["网信办", "公安机关", "工信部", "国家安全机关"],
+                answer: 0
+            },
+            {
+                question: "《反间谍法》规定公民的义务不包括？",
+                options: ["及时报告线索", "提供必要支持", "保守国家秘密", "直接抓捕嫌疑人"],
+                answer: 3
+            },
+            {
+                question: "间谍行为举报最高奖励金额为？",
+                options: ["5万元", "10万元", "50万元", "上不封顶"],
+                answer: 3
+            },
+            {
+                question: "机密级国家秘密保密期限一般是？",
+                options: ["10年", "20年", "30年", "不超过50年"],
+                answer: 1
+            },
+            {
+                question: "下列属于保密违法行为的是？",
+                options: ["使用微信传输工作文件", "在涉密场所使用手机", "私自销毁涉密载体", "以上都是"],
+                answer: 3
+            },
+            {
+                question: "我国陆地边界总长度约为？",
+                options: ["1.8万公里", "2.2万公里", "3.5万公里", "4.2万公里"],
+                answer: 1
+            },
+            {
+                question: "边境管理区的通行证件是？",
+                options: ["身份证", "护照", "边境通行证", "社保卡"],
+                answer: 2
+            },
+            {
+                question: "国家公园体制试点始于哪一年？",
+                options: ["2013", "2015", "2017", "2020"],
+                answer: 2
+            },
+            {
+                question: "下列属于外来入侵物种的是？",
+                options: ["红火蚁", "大熊猫", "东北虎", "丹顶鹤"],
+                answer: 0
+            },
+            {
+                question: "我国实行最严格的耕地保护制度，红线是？",
+                options: ["15亿亩", "18亿亩", "20亿亩", "25亿亩"],
+                answer: 1
+            },
+            {
+                question: "战略石油储备天数要求是？",
+                options: ["30天", "60天", "90天", "180天"],
+                answer: 2
+            },
+            {
+                question: "《出口管制法》实施时间是？",
+                options: ["2018", "2020", "2021", "2022"],
+                answer: 1
+            },
+            {
+                question: "关键信息基础设施运营者应当实行什么制度？",
+                options: ["首席安全官", "数据备份", "安全审查", "以上都是"],
+                answer: 3
+            },
+            {
+                question: "境外非政府组织境内活动应当向哪个部门备案？",
+                options: ["民政部", "公安部", "外交部", "文化部"],
+                answer: 1
+            },
+            {
+                question: "国家建立什么审查制度？",
+                options: ["网络内容", "影视作品", "出版物", "以上都是"],
+                answer: 3
+            },
+            {
+                question: "国家安全工作应当坚持的原则是？",
+                options: ["预防为主", "标本兼治", "统筹兼顾", "总体国家安全观"],
+                answer: 3
+            },
+            {
+                question: "维护国家安全的核心是？",
+                options: ["政治安全", "军事安全", "经济安全", "文化安全"],
+                answer: 0
+            },
+            {
+                question: "国家情报工作机构是？",
+                options: ["国家安全部", "中央军委联参", "公安部", "以上都是"],
+                answer: 3
+            },
+            {
+                question: "《密码法》实施时间是？",
+                options: ["2019年10月1日", "2020年1月1日", "2021年5月1日", "2022年6月1日"],
+                answer: 1
+            },
+            {
+                question: "发现可疑无人机应报告？",
+                options: ["城管", "民航局", "公安机关", "生态环境部"],
+                answer: 2
+            },
+            {
+                question: "核安全观的核心是？",
+                options: ["理性、协调", "安全、发展", "并进、可持续", "以上都是"],
+                answer: 3
+            },
+            {
+                question: "生物安全法实施时间？",
+                options: ["2020", "2021", "2022", "未颁布"],
+                answer: 1
+            },
+            {
+                question: "军事设施保护范围是？",
+                options: ["10米", "50米", "100米", "视类型而定"],
+                answer: 3
+            },
+            {
+                question: "国家战略物资储备不包括？",
+                options: ["粮食", "原油", "稀土", "黄金"],
+                answer: 3
+            },
+            {
+                question: "深海海底区域资源开发应向哪个部门申请？",
+                options: ["自然资源部", "外交部", "国防科工局", "生态环境部"],
+                answer: 0
+            },
+            {
+                question: "维护国家安全应当坚持的最大优势是？",
+                options: ["科技先进", "党的领导", "人民战争", "法治保障"],
+                answer: 1
+            }
+        ];
+
+        // 存储当前试题
+        let currentQuiz = [];
+
+        // 随机选择10题
+        function getRandomQuestions() {
+            const shuffled = [...questions].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 10);
+        }
+
+        // 生成试卷
+        function generateQuiz() {
+            const quiz = document.getElementById('quiz');
+            currentQuiz = getRandomQuestions();
+
+            let quizHTML = '';
+            currentQuiz.forEach((q, index) => {
+                // 打乱选项顺序
+                const options = [...q.options].sort(() => 0.5 - Math.random());
+                const correctIndex = options.indexOf(q.options[q.answer]);
+
+                quizHTML += `
+                    <div class="question">
+                        <p>${index + 1}. ${q.question}</p>
+                        ${options.map((option, i) => `
+                            <label>
+                                <input type="radio" name="q${index}" value="${i === correctIndex ? 1 : 0}">
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+            });
+            quiz.innerHTML = quizHTML;
+        }
+
+        // 计算分数
+        function calculateScore() {
+            let score = 0;
+            
+            currentQuiz.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selected && parseInt(selected.value) === 1) {
+                    score += 10;
+                }
+            });
+
+            document.getElementById('result').innerHTML = `您的得分：${score}分`;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        // 页面加载时生成题目
+        window.onload = generateQuiz;
+    </script>
+</body>
+</html>
